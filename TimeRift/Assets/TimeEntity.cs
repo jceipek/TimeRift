@@ -12,13 +12,8 @@ public class TimeEntity : MonoBehaviour {
 		_transform = transform;
 	}
 
-	void FixedUpdate () {
-		if (!TimeManager.g.ShouldSimulate) { return; }
-		_transform.position += Time.fixedDeltaTime * _transform.forward;
-
-		_myInfo.location = _transform.position;
-		_myInfo.rotation = _transform.rotation;
-		TimeManager.g.RecordTimeEntityInfo(_myInfo);
+	void Start () {
+		TimeManager.g.RegisterEntity(this);
 	}
 
 	public void SetTo (TimeEntityInfo info) {
@@ -26,4 +21,10 @@ public class TimeEntity : MonoBehaviour {
 		_transform.rotation = info.rotation;
 	}
 
+	public TimeEntityInfo Simulate () {
+		_transform.position += Time.fixedDeltaTime * _transform.forward;
+		_myInfo.location = _transform.position;
+		_myInfo.rotation = _transform.rotation;
+		return _myInfo;
+	}
 }

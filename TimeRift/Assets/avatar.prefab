@@ -402,7 +402,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 143996}
-  _isSimulated: 0
 --- !u!124 &12443996
 Behaviour:
   m_ObjectHideFlags: 1

@@ -8,7 +8,6 @@ public class TimeEntity : MonoBehaviour {
 	private CharacterMotor _motor;
 	[SerializeField]
 	private GameObject _camera;
-	[SerializeField] // TODO(Julian): Eliminate this
 	private bool _isSimulated = true;
 
 	public bool SimulateMe {
@@ -35,8 +34,10 @@ public class TimeEntity : MonoBehaviour {
 	}
 
 	public void SetTo (TimeEntityInfo info) {
-		_transform.position = info.location;
-		_transform.rotation = info.rotation;
+		if (!_isSimulated) {
+			_transform.position = info.location;
+			_transform.rotation = info.rotation;
+		}
 	}
 
 	public TimeEntityInfo Simulate () {

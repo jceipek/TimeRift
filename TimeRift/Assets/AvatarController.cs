@@ -8,7 +8,7 @@ public class AvatarController : MonoBehaviour {
 	private IMotor[] _characterMotors;
 	private CharacterMotor _defaultMotor;
 	// private ClimbMotor _climbMotor;
-	private Transform _cameraTransform;
+	// private Transform _cameraTransform;
 
 	// [SerializeField]
 	// private float _climbSensitivity = 0.3f; // Closer to 0 = more sensitive
@@ -42,7 +42,7 @@ public class AvatarController : MonoBehaviour {
 
 		// _climbMotor.Enabled = false;
 		_defaultMotor.Enabled = true;
-		_cameraTransform = Camera.main.transform;
+		// _cameraTransform = Camera.main.transform;
 	}
 
 	void Start () {
@@ -59,7 +59,7 @@ public class AvatarController : MonoBehaviour {
 				}
 				Vector2 inputVector = new Vector2(device.LeftStickX.Value, device.LeftStickY.Value);
 				Vector3 tempVector = new Vector3( inputVector.x, 0, inputVector.y);
-				Quaternion rot = Quaternion.AngleAxis(_cameraTransform.eulerAngles.y, Vector3.up);
+				Quaternion rot = Quaternion.AngleAxis(_transform.eulerAngles.y, Vector3.up);
 
 				tempVector = rot * tempVector;
 				inputVector = new Vector2(tempVector.x, tempVector.z);

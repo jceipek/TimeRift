@@ -48,6 +48,8 @@ public class TimeManager : MonoBehaviour
 	private TimeState _timeState;
 
 	private List<TimeEntity> _registeredEntities = new List<TimeEntity> ();
+	[SerializeField]
+	private TimeEntity _newestSelf;
 
 	public static TimeManager g;
 	void Awake ()
@@ -85,6 +87,8 @@ public class TimeManager : MonoBehaviour
 		_newTimeSegmentsFillAmount = 0;
 
 		_timeState = TimeState.Playing;
+
+		_newestSelf.SimulateMe = true;
 	}
 
 	void Update ()
@@ -102,6 +106,10 @@ public class TimeManager : MonoBehaviour
 		// Note: this must run before every other script in the scene!
 		_timeText.text = ReadableTime;
 		LoadFrame(_time);
+
+		if (!_newestSelf.gameObject.activeSelf) {
+			_newestSelf.gameObject.SetActive(true);
+		}
 
 		switch (_timeState) {
 		case TimeState.Rewinding:
@@ -127,9 +135,19 @@ public class TimeManager : MonoBehaviour
 				_oldTimeSegmentsFillAmount = _newTimeSegmentsFillAmount;
 				_newTimeSegmentsFillAmount = 0;
 
-				Events.g.Raise(new SpawnEvent());
 
-				_registeredEntities.Clear ();
+				if (_newestSelf != null) {
+					GameObject newest = Instantiate(_newestSelf.gameObject,
+										_newestSelf.gameObject.transform.position,
+										_newestSelf.gameObject.transform.rotation) as GameObject;
+					_newestSelf.SimulateMe = false;
+					_newestSelf = newest.GetComponent<TimeEntity>();
+					_newestSelf.SimulateMe = true;
+					newest.SetActive(false);
+				}
+				// Events.g.Raise(new SpawnEvent());
+
+				// _registeredEntities.Clear ();
 			}
 			break;
 		}
@@ -192,12 +210,19 @@ public class TimeManager : MonoBehaviour
 			_newTimeSegmentsFillAmount++;
 		}
 
-		for (int i = 0; i < _registeredEntities.Count; i++) {
-			TimeEntityInfo segment = _registeredEntities [i].Simulate ();
+		if (_newestSelf != null) {
+			TimeEntityInfo segment = _newestSelf.Simulate();
 			_newTimeSegments [currIndex] = segment;
 			currIndex++;
 			_newTimeSegmentsFillAmount++;
 		}
+
+		// for (int i = 0; i < _registeredEntities.Count; i++) {
+		// 	TimeEntityInfo segment = _registeredEntities [i].Simulate ();
+		// 	_newTimeSegments [currIndex] = segment;
+		// 	currIndex++;
+		// 	_newTimeSegmentsFillAmount++;
+		// }
 		_newSegmentIndexAtTime [t + 1] = currIndex;
 	}
 

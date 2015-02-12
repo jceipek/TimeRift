@@ -30,9 +30,11 @@ public class TimeManager : MonoBehaviour
 	[SerializeField]
 	Text
 		_timeText;
-
-	private int _time;
+	[SerializeField]
+	private int _maxTimeInitializer;
 	private int _maxTime;
+	private int _time;
+
 	private int _maxTimeSimulated;
 
 	private int[] _oldSegmentIndexAtTime;
@@ -59,7 +61,10 @@ public class TimeManager : MonoBehaviour
 
 	private string ReadableTime {
 		get {
-			return _time.ToString ();
+			int t = _maxTime - _time;
+			int seconds = (int)(t/(1f/Time.fixedDeltaTime));
+			int centiseconds = (int)(t - seconds*(1f/Time.fixedDeltaTime));
+			return seconds.ToString().PadLeft(2, '0') + ":" + centiseconds.ToString().PadLeft(2,'0');
 		}
 	}
 
@@ -68,7 +73,7 @@ public class TimeManager : MonoBehaviour
 		_time = 0;
 
 		_maxTimeSimulated = 0;
-		_maxTime = 30*30;
+		_maxTime = (int)(1f/Time.fixedDeltaTime) * _maxTimeInitializer;
 		int maxEntitiesPerFrame = 500;
 
 		_oldSegmentIndexAtTime = new int[_maxTime + 1];
@@ -82,15 +87,15 @@ public class TimeManager : MonoBehaviour
 		_timeState = TimeState.Playing;
 	}
 
-	// void Update ()
-	// {
-	// 	if (Input.GetKeyDown (KeyCode.R)) {
-	// 		_timeState = TimeState.Rewinding;
-	// 	}
-	// 	if (Input.GetKeyUp (KeyCode.R)) {
-	// 		_timeState = TimeState.Playing;
-	// 	}
-	// }
+	void Update ()
+	{
+		if (Input.GetKeyDown (KeyCode.R)) {
+			_timeState = TimeState.Rewinding;
+		}
+		if (Input.GetKeyUp (KeyCode.R)) {
+			_timeState = TimeState.Playing;
+		}
+	}
 
 	void FixedUpdate ()
 	{
@@ -121,6 +126,8 @@ public class TimeManager : MonoBehaviour
 				_newSegmentIndexAtTime = temp2;
 				_oldTimeSegmentsFillAmount = _newTimeSegmentsFillAmount;
 				_newTimeSegmentsFillAmount = 0;
+
+				Events.g.Raise(new SpawnEvent());
 
 				_registeredEntities.Clear ();
 			}

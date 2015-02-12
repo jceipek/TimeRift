@@ -5,11 +5,29 @@ using System.Collections;
 public class TimeEntity : MonoBehaviour {
 
 	private TimeEntityInfo _myInfo;
+	private CharacterMotor _motor;
+	[SerializeField]
+	private GameObject _camera;
+	[SerializeField] // TODO(Julian): Eliminate this
+	private bool _isSimulated = true;
+
+	public bool SimulateMe {
+		get { return _isSimulated; }
+		set {
+			_isSimulated = value;
+			_camera.SetActive(value);
+		}
+	}
+
+	void OnValidate () {
+		_camera.SetActive(_isSimulated);
+	}
 
 	private Transform _transform;
 	void Awake () {
 		_myInfo.entityId = this;
 		_transform = transform;
+		_motor = GetComponent<CharacterMotor>();
 	}
 
 	void Start () {
@@ -22,7 +40,9 @@ public class TimeEntity : MonoBehaviour {
 	}
 
 	public TimeEntityInfo Simulate () {
-		_transform.position += Time.fixedDeltaTime * _transform.forward;
+		if (!_isSimulated) { return _myInfo; }
+		_motor.Simulate();
+		// _transform.position += Time.fixedDeltaTime * _transform.forward;
 		_myInfo.location = _transform.position;
 		_myInfo.rotation = _transform.rotation;
 		return _myInfo;

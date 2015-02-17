@@ -16,6 +16,9 @@ public class TimeEntity : MonoBehaviour {
 	[SerializeField]
 	private GameObject _camera;
 	[SerializeField]
+	private GameObject _viewportModel;
+	private int _viewportModelLayer;
+	[SerializeField]
 	Transform _viewPoint;
 	private bool _isSimulated = true;
 
@@ -24,6 +27,11 @@ public class TimeEntity : MonoBehaviour {
 		set {
 			_isSimulated = value;
 			_camera.SetActive(value);
+			if (value) {
+				_viewportModel.layer = _viewportModelLayer;
+			} else {
+				_viewportModel.layer = 0;
+			}
 		}
 	}
 
@@ -33,6 +41,7 @@ public class TimeEntity : MonoBehaviour {
 
 	private Transform _transform;
 	void Awake () {
+		_viewportModelLayer = _viewportModel.layer;
 		_transform = transform;
 		_motor = GetComponent<CharacterMotor>();
 	}

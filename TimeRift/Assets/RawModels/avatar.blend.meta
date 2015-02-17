@@ -8,15 +8,23 @@ ModelImporter:
     100004: Avatar
     100006: Eyelid
     100008: Body
+    100010: Viewport
     400000: //RootNode
     400002: Armature
     400004: Avatar
     400006: Eyelid
     400008: Body
+    400010: Viewport
     2300000: //RootNode
+    2300002: Body
+    2300004: Viewport
     3300000: //RootNode
+    3300002: Body
+    3300004: Viewport
     4300000: Cube
     4300002: Avatar
+    4300004: Viewport
+    4300006: Body
     7400000: Default Take
     9500000: //RootNode
     13700000: Avatar
@@ -71,6 +79,6 @@ ModelImporter:
     feetSpacing: 0
     rootMotionBoneName: 
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   additionalBone: 0
   userData: 

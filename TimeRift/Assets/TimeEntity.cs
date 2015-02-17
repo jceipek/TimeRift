@@ -2,6 +2,13 @@
 using System.Collections;
 
 
+public struct TimeEntityInfo
+{
+	public Vector3 location;
+	public Quaternion rotation;
+	public Quaternion viewRotation;
+}
+
 public class TimeEntity : MonoBehaviour {
 
 	private TimeEntityInfo _myInfo;
@@ -34,6 +41,7 @@ public class TimeEntity : MonoBehaviour {
 		// if (!_isSimulated) {
 			_transform.position = info.location;
 			_transform.rotation = info.rotation;
+			_viewPoint.rotation = info.viewRotation;
 		// }
 	}
 
@@ -43,6 +51,7 @@ public class TimeEntity : MonoBehaviour {
 		// _transform.position += Time.fixedDeltaTime * _transform.forward;
 		_myInfo.location = _transform.position;
 		_myInfo.rotation = _transform.rotation;
+		_myInfo.viewRotation = _viewPoint.rotation;
 		return _myInfo;
 	}
 

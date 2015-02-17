@@ -58,6 +58,20 @@ namespace CustomInputProfiles
 				},
 				new InputControlMapping
 				{
+					Handle = "Move X - Alt",
+					Target = InputControlType.LeftStickX,
+					// KeyCodeAxis splits the two KeyCodes over an axis. The first is negative, the second positive.
+					Source = KeyCodeAxis( KeyCode.A, KeyCode.D )
+				},
+				new InputControlMapping
+				{
+					Handle = "Move Y - Alt",
+					Target = InputControlType.LeftStickY,
+					// Notes that up is positive in Unity, therefore the order of KeyCodes is down, up.
+					Source = KeyCodeAxis( KeyCode.S, KeyCode.W )
+				},
+				new InputControlMapping
+				{
 					Handle = "Look X",
 					Target = InputControlType.RightStickX,
 					Source = MouseXAxis,

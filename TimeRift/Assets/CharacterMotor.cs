@@ -10,6 +10,7 @@ public class CharacterMotor : MonoBehaviour, IMotor
 	// Input Cache
 	private bool _jumpFlag = false;
 	private Vector3 _inputVector;
+	private Vector2 _lookInputVector;
 
 	private bool _grounded = false;
 	private bool _walkingBackward = false;
@@ -22,6 +23,9 @@ public class CharacterMotor : MonoBehaviour, IMotor
 #endregion
 
 #region Properties
+
+	[SerializeField]
+	private Transform _cameraTransform;
 
 	[SerializeField]
 	private Collider _feetCollider;
@@ -49,6 +53,27 @@ public class CharacterMotor : MonoBehaviour, IMotor
 // Can Flags
 	[SerializeField]
 	private bool canJump = true;
+
+
+	public enum RotationAxes { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
+	[SerializeField]
+	RotationAxes _lookAxes = RotationAxes.MouseXAndY;
+	[SerializeField]
+	float _lookSensitivityX = 5F;
+	[SerializeField]
+	float _lookSensitivityY = 5F;
+
+	// [SerializeField]
+	// float minimumX = -360F;
+	// [SerializeField]
+	// float maximumX = 360F;
+
+	[SerializeField]
+	float _lookMinimumY = -60F;
+	[SerializeField]
+	float _lookMaximumY = 60F;
+
+	private float _lookRotationY = 0F;
 
 #endregion
 
@@ -106,13 +131,35 @@ public class CharacterMotor : MonoBehaviour, IMotor
 			_rigidbody.AddForce(damping + velocityChange, ForceMode.VelocityChange);
 		}
 
-		if (planarMagnitude > _minMagToRotate) {
-			float walkDir = 1f;
-			if (_walkingBackward) {
-				walkDir = -1f;
-			}
-			_transform.forward = Vector3.RotateTowards(_transform.forward, walkDir * planarVelocity, Time.fixedDeltaTime * _rotationSpeed, _minMagToRotate);
-		}
+		// if (planarMagnitude > _minMagToRotate) {
+		// 	float walkDir = 1f;
+		// 	if (_walkingBackward) {
+		// 		walkDir = -1f;
+		// 	}
+		// 	// _transform.forward = Vector3.RotateTowards(_transform.forward, walkDir * planarVelocity,
+		// 											   // Time.fixedDeltaTime * _rotationSpeed, _minMagToRotate);
+		// }
+
+		// if (_lookAxes == RotationAxes.MouseXAndY)
+		// {
+		// 	float rotationX = transform.localEulerAngles.y + InputManager.ActiveDevice.RightStickX * _lookSensitivityX;
+
+		// 	_lookRotationY += InputManager.ActiveDevice.RightStickY * _lookSensitivityY;
+		// 	_lookRotationY = Mathf.Clamp (_lookRotationY, _lookMinimumY, _lookMaximumY);
+
+		// 	transform.localEulerAngles = new Vector3(-_lookRotationY, rotationX, 0);
+		// }
+		// else if (_lookAxes == RotationAxes.MouseX)
+		// {
+		_transform.Rotate(0, _lookInputVector.x * _lookSensitivityX, 0);
+		// }
+		// else
+		// {
+		_lookRotationY += _lookInputVector.y * _lookSensitivityY;
+		_lookRotationY = Mathf.Clamp (_lookRotationY, _lookMinimumY, _lookMaximumY);
+
+		_cameraTransform.localEulerAngles = new Vector3(-_lookRotationY, _cameraTransform.localEulerAngles.y, 0);
+		// }
 	}
 
 	// Unparent if we are no longer standing on our parent
@@ -210,6 +257,10 @@ public class CharacterMotor : MonoBehaviour, IMotor
 
 	public void Move (Vector2 inputVector) {
 		_inputVector = new Vector3(inputVector.x, 0f, inputVector.y);
+	}
+
+	public void Look (Vector2 lookVector) {
+		_lookInputVector = lookVector;
 	}
 
 	public void Jump () {

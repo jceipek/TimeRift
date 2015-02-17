@@ -11,12 +11,6 @@ public enum TimeState
 	Rewinding
 }
 
-public struct TimeEntityInfo
-{
-	public Vector3 location;
-	public Quaternion rotation;
-}
-
 public class TimeManipulator : MonoBehaviour {
 
 	class AvatarTravelInfo {

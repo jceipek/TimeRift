@@ -50,6 +50,7 @@ GameObject:
   - 114: {fileID: 11444002}
   - 65: {fileID: 6544002}
   - 82: {fileID: 8252014}
+  - 114: {fileID: 11499868}
   m_Layer: 0
   m_Name: avatar
   m_TagString: Untagged
@@ -142,6 +143,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 477798}
+  - 114: {fileID: 11499870}
   m_Layer: 0
   m_Name: ViewPoint
   m_TagString: Untagged
@@ -170,8 +172,7 @@ Transform:
   m_LocalRotation: {x: 5.94475225e-08, y: .00263357162, z: -5.94474656e-08, w: .999996603}
   m_LocalPosition: {x: -.0109999999, y: -.0549999475, z: .0629996136}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 472664}
+  m_Children: []
   m_Father: {fileID: 477798}
   m_RootOrder: 0
 --- !u!4 &451974
@@ -246,12 +247,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 172664}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 5.94475225e-08, y: .00263357162, z: -5.94474656e-08, w: .999996603}
+  m_LocalPosition: {x: -.0109999999, y: -.0549999475, z: .0629996136}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 443996}
-  m_RootOrder: 0
+  m_Father: {fileID: 477798}
+  m_RootOrder: 1
 --- !u!4 &477798
 Transform:
   m_ObjectHideFlags: 1
@@ -263,6 +264,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 443996}
+  - {fileID: 472664}
   m_Father: {fileID: 451974}
   m_RootOrder: 3
 --- !u!20 &2043996
@@ -457,6 +459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7db84f1e1a114be09fc31704e84cc21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cameraTransform: {fileID: 0}
   _feetCollider: {fileID: 13516174}
   _minMagToRotate: 1
   _walkingAudio: {fileID: 8252014}
@@ -466,6 +469,11 @@ MonoBehaviour:
   _airFriction: .100000001
   _jumpHeight: .5
   canJump: 1
+  _lookAxes: 0
+  _lookSensitivityX: 5
+  _lookSensitivityY: 5
+  _lookMinimumY: -60
+  _lookMaximumY: 60
 --- !u!114 &11444002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -491,6 +499,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _camera: {fileID: 143996}
   _viewPoint: {fileID: 477798}
+--- !u!114 &11499868
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 151974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68ec2fe99d1108b9d0006a298d76c639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  axes: 1
+  sensitivityX: 15
+  sensitivityY: 15
+  minimumX: -360
+  maximumX: 360
+  minimumY: -60
+  maximumY: 60
+--- !u!114 &11499870
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 177798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68ec2fe99d1108b9d0006a298d76c639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  axes: 2
+  sensitivityX: 5
+  sensitivityY: 5
+  minimumX: -360
+  maximumX: 360
+  minimumY: -60
+  maximumY: 60
 --- !u!124 &12443996
 Behaviour:
   m_ObjectHideFlags: 1

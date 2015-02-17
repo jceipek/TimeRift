@@ -61,9 +61,12 @@ public class AvatarController : MonoBehaviour {
 				Vector3 tempVector = new Vector3( inputVector.x, 0, inputVector.y);
 				Quaternion rot = Quaternion.AngleAxis(_transform.eulerAngles.y, Vector3.up);
 
+				Vector2 lookInputVector = new Vector2(device.RightStickX.Value, device.RightStickY.Value);
+
 				tempVector = rot * tempVector;
 				inputVector = new Vector2(tempVector.x, tempVector.z);
 				_characterMotors[i].Move(inputVector);
+				_characterMotors[i].Look(lookInputVector);
 
 				if (device.Action1.WasPressed) {
 					_characterMotors[i].Jump();

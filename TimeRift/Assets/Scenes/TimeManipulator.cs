@@ -33,9 +33,24 @@ public class TimeManipulator : MonoBehaviour {
 
 	private List<AvatarTravelInfo> _avatarHistories = new List<AvatarTravelInfo>();
 
+	// Get volume based on http://answers.unity3d.com/questions/165729/editing-height-relative-to-audio-levels.html
+	private float[] _volumeSamples = new float[1024]; // audio samples
+
+	float GetVolume (AudioSource source) {
+		source.GetOutputData(_volumeSamples, 0); // fill array with samples
+		float sum = 0;
+		int samples = _volumeSamples.Length;
+		for (int i=0; i < samples; i++){
+			sum += _volumeSamples[i]*_volumeSamples[i]; // sum squared samples
+		}
+		return Mathf.Sqrt(sum/samples); // rms = square root of average
+	}
+
 
 	[SerializeField]
 	Text _timeText;
+	[SerializeField]
+	GameObject _paradoxTextObject;
 	[SerializeField]
 	int _maxSecondsInitializer;
 	[SerializeField]
@@ -193,6 +208,12 @@ public class TimeManipulator : MonoBehaviour {
 					_avatarHistories[i].entity.SetTo(_avatarHistories[i].timeTravelFrames[_currFrame]);
 				}
 
+				if (GetVolume(_alarmAudioSource) > 0.2f) {
+					_paradoxTextObject.SetActive(true);
+				} else {
+					_paradoxTextObject.SetActive(false);
+				}
+
 				_currFrame -= _paradoxRewindSpeed;
 			} else {
 
@@ -200,6 +221,7 @@ public class TimeManipulator : MonoBehaviour {
 				_currFrame = 0;
 				_newestSelf.UnFreezeMotion();
 
+				_paradoxTextObject.SetActive(false);
 				_alarmAudioSource.Stop();
 			}
 		}

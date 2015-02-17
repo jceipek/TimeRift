@@ -18,6 +18,7 @@ public class CharacterMotor : MonoBehaviour, IMotor
 
 	private Transform _transform;
 	private Rigidbody _rigidbody;
+
 #endregion
 
 #region Properties
@@ -26,6 +27,8 @@ public class CharacterMotor : MonoBehaviour, IMotor
 	private Collider _feetCollider;
 	[SerializeField]
 	private float _minMagToRotate = 1f;
+	[SerializeField]
+	private AudioSource _walkingAudio;
 
 // Accelerations
 	[SerializeField]
@@ -60,8 +63,20 @@ public class CharacterMotor : MonoBehaviour, IMotor
 		_rigidbody.useGravity = true;
 	}
 
-	void Update () {
+	private Vector3 _lastPos;
+	void Start () {
+		_lastPos = _transform.position;
+	}
 
+	void FixedUpdate () {
+		if ((_lastPos - _transform.position).sqrMagnitude < 0.001f) {
+			_walkingAudio.Pause();
+		} else {
+			if (!_walkingAudio.isPlaying) {
+				_walkingAudio.Play();
+			}
+		}
+		_lastPos = _transform.position;
 	}
 
 	public void Simulate () {
@@ -107,7 +122,7 @@ public class CharacterMotor : MonoBehaviour, IMotor
 		}
 	}
 
-	// If there are collisions check if the character is _grounded
+	// If there are collisions check if the character is grounded
 	void OnCollisionStay (Collision col) {
 		TrackGrounded(col);
 	}

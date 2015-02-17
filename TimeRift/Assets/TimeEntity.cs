@@ -8,6 +8,8 @@ public class TimeEntity : MonoBehaviour {
 	private CharacterMotor _motor;
 	[SerializeField]
 	private GameObject _camera;
+	[SerializeField]
+	Transform _viewPoint;
 	private bool _isSimulated = true;
 
 	public bool SimulateMe {
@@ -47,5 +49,29 @@ public class TimeEntity : MonoBehaviour {
 		_myInfo.location = _transform.position;
 		_myInfo.rotation = _transform.rotation;
 		return _myInfo;
+	}
+
+	public Vector3 Forward {
+		get {
+			return _viewPoint.forward;
+		}
+	}
+
+	public Vector3 EyeLocation {
+		get {
+			return _viewPoint.position;
+		}
+	}
+
+	public Vector3 Location {
+		get {
+			return _transform.position;
+		}
+	}
+
+	public Quaternion Rotation {
+		get {
+			return _transform.rotation;
+		}
 	}
 }

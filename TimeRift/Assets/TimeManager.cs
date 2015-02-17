@@ -101,8 +101,34 @@ public class TimeManager : MonoBehaviour
 		}
 	}
 
+	float _separationToCatch = 1f;
+	float _fovToCatch = 0.75f;
 	void FixedUpdate ()
 	{
+
+		for (int i = 0; i < _registeredEntities.Count; i++) {
+			var entityToTest = _registeredEntities[i];
+			if (_newestSelf == entityToTest) { continue; }
+			Vector3 toOther = _newestSelf.EyeLocation - entityToTest.EyeLocation;
+			if (toOther.sqrMagnitude <= _separationToCatch * _separationToCatch) {
+				Debug.Log("Too Close!");
+			}
+			Debug.DrawLine(entityToTest.EyeLocation, entityToTest.EyeLocation + entityToTest.Forward, Color.red);
+			float f = Vector3.Dot(entityToTest.Forward, toOther.normalized);
+			if (f >= _fovToCatch) {
+				Debug.DrawLine(_newestSelf.EyeLocation, entityToTest.EyeLocation, Color.blue);
+				Debug.Log("In FOV: "+f+"!");
+				RaycastHit hitInfo;
+				if (Physics.Raycast(entityToTest.EyeLocation, toOther.normalized, out hitInfo, distance: Mathf.Infinity)) {
+					if (hitInfo.collider.gameObject.GetComponent<TimeEntity>() != null) {
+						Debug.DrawLine(_newestSelf.EyeLocation, entityToTest.EyeLocation, Color.yellow);
+						Debug.DrawLine(hitInfo.point, entityToTest.EyeLocation, Color.green);
+						Debug.Log("Spotted!");
+					}
+				}
+			}
+		}
+
 		// Note: this must run before every other script in the scene!
 		_timeText.text = ReadableTime;
 		LoadFrame(_time);

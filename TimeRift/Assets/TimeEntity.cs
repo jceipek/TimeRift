@@ -36,10 +36,10 @@ public class TimeEntity : MonoBehaviour {
 	}
 
 	public void SetTo (TimeEntityInfo info) {
-		if (!_isSimulated) {
+		// if (!_isSimulated) {
 			_transform.position = info.location;
 			_transform.rotation = info.rotation;
-		}
+		// }
 	}
 
 	public TimeEntityInfo Simulate () {

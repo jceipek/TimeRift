@@ -3,27 +3,6 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum TimeState
-{
-	Playing,
-	Rewinding
-}
-
-public struct TimeEntityInfo
-{
-	public TimeEntity entityId;
-	public Vector3 location;
-	public Quaternion rotation;
-
-	public override string ToString ()
-	{
-		if (entityId == null) {
-			return "EID: null";
-		}
-		return ("EID: " + entityId.gameObject.name);
-	}
-}
-
 public class TimeManager : MonoBehaviour
 {
 

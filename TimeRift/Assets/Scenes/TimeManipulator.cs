@@ -46,6 +46,10 @@ public class TimeManipulator : MonoBehaviour {
 		return Mathf.Sqrt(sum/samples); // rms = square root of average
 	}
 
+	[SerializeField]
+	Light _alarmLight;
+	[SerializeField]
+	AnimationCurve _alarmLightIntensityCurve;
 
 	[SerializeField]
 	Text _timeText;
@@ -208,11 +212,13 @@ public class TimeManipulator : MonoBehaviour {
 					_avatarHistories[i].entity.SetTo(_avatarHistories[i].timeTravelFrames[_currFrame]);
 				}
 
-				if (GetVolume(_alarmAudioSource) > 0.2f) {
+				float volume = GetVolume(_alarmAudioSource);
+				if (volume > 0.2f) {
 					_paradoxTextObject.SetActive(true);
 				} else {
 					_paradoxTextObject.SetActive(false);
 				}
+				_alarmLight.intensity = _alarmLightIntensityCurve.Evaluate(volume);
 
 				_currFrame -= _paradoxRewindSpeed;
 			} else {
@@ -222,6 +228,7 @@ public class TimeManipulator : MonoBehaviour {
 				_newestSelf.UnFreezeMotion();
 
 				_paradoxTextObject.SetActive(false);
+				_alarmLight.intensity = 0f;
 				_alarmAudioSource.Stop();
 			}
 		}

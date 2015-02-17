@@ -26,13 +26,8 @@ public class TimeEntity : MonoBehaviour {
 
 	private Transform _transform;
 	void Awake () {
-		_myInfo.entityId = this;
 		_transform = transform;
 		_motor = GetComponent<CharacterMotor>();
-	}
-
-	void Start () {
-		TimeManager.g.RegisterEntity(this);
 	}
 
 	public void SetTo (TimeEntityInfo info) {
@@ -73,5 +68,13 @@ public class TimeEntity : MonoBehaviour {
 		get {
 			return _transform.rotation;
 		}
+	}
+
+	public void FreezeMotion () {
+		GetComponent<Rigidbody>().isKinematic = true;
+	}
+
+	public void UnFreezeMotion () {
+		GetComponent<Rigidbody>().isKinematic = false;
 	}
 }

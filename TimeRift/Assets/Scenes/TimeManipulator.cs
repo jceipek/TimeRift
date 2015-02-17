@@ -6,22 +6,15 @@ using System.Collections.Generic;
 public enum TimeState
 {
 	Playing,
+	RewindingBecauseLoop,
+	RewindingBecauseSeen,
 	Rewinding
 }
 
 public struct TimeEntityInfo
 {
-	public TimeEntity entityId;
 	public Vector3 location;
 	public Quaternion rotation;
-
-	public override string ToString ()
-	{
-		if (entityId == null) {
-			return "EID: null";
-		}
-		return ("EID: " + entityId.gameObject.name);
-	}
 }
 
 public class TimeManipulator : MonoBehaviour {
@@ -40,30 +33,47 @@ public class TimeManipulator : MonoBehaviour {
 
 	private List<AvatarTravelInfo> _avatarHistories = new List<AvatarTravelInfo>();
 
+
 	[SerializeField]
 	Text _timeText;
 	[SerializeField]
 	int _maxSecondsInitializer;
 	[SerializeField]
 	TimeEntity _newestSelf;
+	[SerializeField]
+	private AudioClip _alarmSound;
+	[SerializeField]
+	private AudioClip[] _screamSounds;
+	private AudioSource _alarmAudioSource;
+	private AudioSource _screamAudioSource;
 	private int _maxFrames;
-	private int _currFrame;
+	private static int _currFrame;
+	public static int CurrFrame {
+		get { return _currFrame; }
+	}
 	private int _maxFramesSimulated;
-	private TimeState _timeState;
+	private static TimeState _currTimeState;
+	public static TimeState CurrTimeState {
+		get { return _currTimeState; }
+	}
 
 
 	private string ReadableTime {
 		get {
 			int t = _maxFrames - _currFrame;
-			int seconds = (int)(t/(1f/Time.fixedDeltaTime));
-			int centiseconds = (int)(t - seconds*(1f/Time.fixedDeltaTime));
+			int seconds = (int)(t*Time.fixedDeltaTime);
+			int centiseconds = (int)(((t*Time.fixedDeltaTime) - seconds) * 100f);
 			return seconds.ToString().PadLeft(2, '0') + ":" + centiseconds.ToString().PadLeft(2,'0');
 		}
 	}
 
-	// Use this for initialization
+	void Awake () {
+		_alarmAudioSource = gameObject.AddComponent<AudioSource>();
+		_screamAudioSource = gameObject.AddComponent<AudioSource>();
+	}
+
 	void Start () {
-		_timeState = TimeState.Playing;
+		_currTimeState = TimeState.Playing;
 		_currFrame = 0;
 		_maxFrames = (int)(1f/Time.fixedDeltaTime) * _maxSecondsInitializer;
 		_maxFramesSimulated = 0;
@@ -74,31 +84,45 @@ public class TimeManipulator : MonoBehaviour {
 		_newestSelf.SimulateMe = true;
 	}
 
+	enum ParadoxCause {
+		Seen,
+		TooClose
+	}
+
+	private void InitiateParadox (ParadoxCause cause) {
+		_screamAudioSource.clip = _screamSounds[Random.Range(0, _screamSounds.Length)];
+		_screamAudioSource.Play();
+
+		_alarmAudioSource.clip = _alarmSound;
+		_alarmAudioSource.Play();
+		_currTimeState = TimeState.RewindingBecauseSeen;
+	}
+
 	float _separationToCatch = 1f;
 	float _fovToCatch = 0.75f;
 	void FixedUpdate () {
 
 		_timeText.text = ReadableTime;
 
-		if (_timeState == TimeState.Playing) {
+		if (_currTimeState == TimeState.Playing) {
 			for (int i = 0; i < _avatarHistories.Count - 1; i++) {
 				var entityToTest = _avatarHistories[i].entity;
 				if (_newestSelf == entityToTest) { continue; }
 				Vector3 toOther = _newestSelf.EyeLocation - entityToTest.EyeLocation;
 				if (toOther.sqrMagnitude <= _separationToCatch * _separationToCatch) {
-					Debug.Log("Too Close!");
+					InitiateParadox(ParadoxCause.TooClose);
 				}
 				Debug.DrawLine(entityToTest.EyeLocation, entityToTest.EyeLocation + entityToTest.Forward, Color.red);
 				float f = Vector3.Dot(entityToTest.Forward, toOther.normalized);
 				if (f >= _fovToCatch) {
 					Debug.DrawLine(_newestSelf.EyeLocation, entityToTest.EyeLocation, Color.blue);
-					Debug.Log("In FOV: "+f+"!");
+					// Debug.Log("In FOV: "+f+"!");
 					RaycastHit hitInfo;
 					if (Physics.Raycast(entityToTest.EyeLocation, toOther.normalized, out hitInfo, distance: Mathf.Infinity)) {
 						if (hitInfo.collider.gameObject.GetComponent<TimeEntity>() != null) {
 							Debug.DrawLine(_newestSelf.EyeLocation, entityToTest.EyeLocation, Color.yellow);
 							Debug.DrawLine(hitInfo.point, entityToTest.EyeLocation, Color.green);
-							Debug.Log("Spotted!");
+							InitiateParadox(ParadoxCause.Seen);
 						}
 					}
 				}
@@ -118,26 +142,18 @@ public class TimeManipulator : MonoBehaviour {
 				_currFrame++;
 			} else {
 
-				GameObject newest = Instantiate(_newestSelf.gameObject,
-									oldestHistory.timeTravelFrames[0].location,
-									oldestHistory.timeTravelFrames[0].rotation) as GameObject;
+				GameObject newest = Instantiate(_newestSelf.gameObject, Vector3.zero, Quaternion.identity) as GameObject;
+									// oldestHistory.timeTravelFrames[0].location,
+									// oldestHistory.timeTravelFrames[0].rotation) as GameObject;
 				oldestHistory.entity = newest.GetComponent<TimeEntity>();
+				oldestHistory.entity.SetTo(oldestHistory.timeTravelFrames[0]);
 				oldestHistory.entity.SimulateMe = false;
 
 
 				AvatarTravelInfo newestAvatarHistory = new AvatarTravelInfo(_newestSelf, _maxFrames);
 				_avatarHistories.Add(newestAvatarHistory);
 
-				_currFrame = 0;
-			}
-		}
-
-		if (_timeState == TimeState.Rewinding) {
-			if (_currFrame > 0) {
-
-				for (int i = 0; i < _avatarHistories.Count; i++) {
-					_avatarHistories[i].entity.SetTo(_avatarHistories[i].timeTravelFrames[_currFrame]);
-				}
+				_currTimeState = TimeState.RewindingBecauseLoop;
 
 				_currFrame--;
 			}
@@ -146,13 +162,54 @@ public class TimeManipulator : MonoBehaviour {
 		_maxFramesSimulated = (int)Mathf.Max(_currFrame, _maxFramesSimulated);
 	}
 
+	[SerializeField]
+	int _rewindSpeed = 10;
+	[SerializeField]
+	int _paradoxRewindSpeed = 5;
 	void Update ()
 	{
-		if (Input.GetKeyDown (KeyCode.R)) {
-			_timeState = TimeState.Rewinding;
+		if (_currTimeState == TimeState.RewindingBecauseLoop) {
+
+			if (_currFrame > 0) {
+				_newestSelf.FreezeMotion();
+				for (int i = 0; i < _avatarHistories.Count - 1; i++) {
+					_avatarHistories[i].entity.SetTo(_avatarHistories[i].timeTravelFrames[_currFrame]);
+				}
+
+				_currFrame -= _rewindSpeed;
+			} else {
+
+				_currTimeState = TimeState.Playing;
+				_currFrame = 0;
+				_newestSelf.UnFreezeMotion();
+			}
 		}
-		if (Input.GetKeyUp (KeyCode.R)) {
-			_timeState = TimeState.Playing;
+
+		if (_currTimeState == TimeState.RewindingBecauseSeen) {
+
+			if (_currFrame > 0) {
+				_newestSelf.FreezeMotion();
+				for (int i = 0; i < _avatarHistories.Count; i++) {
+					_avatarHistories[i].entity.SetTo(_avatarHistories[i].timeTravelFrames[_currFrame]);
+				}
+
+				_currFrame -= _paradoxRewindSpeed;
+			} else {
+
+				_currTimeState = TimeState.Playing;
+				_currFrame = 0;
+				_newestSelf.UnFreezeMotion();
+
+				_alarmAudioSource.Stop();
+			}
 		}
+
+
+		// if (Input.GetKeyDown (KeyCode.R)) {
+		// 	_currTimeState = TimeState.Rewinding;
+		// }
+		// if (Input.GetKeyUp (KeyCode.R)) {
+		// 	_currTimeState = TimeState.Playing;
+		// }
 	}
 }

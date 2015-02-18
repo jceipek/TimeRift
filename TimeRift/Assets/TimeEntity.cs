@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 
 public struct TimeEntityInfo
@@ -94,5 +95,17 @@ public class TimeEntity : MonoBehaviour {
 
 	public void UnFreezeMotion () {
 		GetComponent<Rigidbody>().isKinematic = false;
+	}
+
+	private List<TimeCollectibleEntity> _collected = new List<TimeCollectibleEntity>();
+	public void AddCollection (TimeCollectibleEntity e) {
+		_collected.Add(e);
+	}
+
+	public void UnCollectAll () {
+		foreach (var e in _collected) {
+			e.Uncollect();
+		}
+		_collected.Clear();
 	}
 }

@@ -160,7 +160,7 @@ GameObject:
   - 4: {fileID: 453170}
   - 33: {fileID: 3353170}
   - 23: {fileID: 2353170}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Viewport
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -229,7 +229,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 151974}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -.00999999978, z: -8.11999989}
+  m_LocalPosition: {x: 0, y: -0, z: -20.1000004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 451982}
@@ -377,7 +377,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294967039
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -569,7 +569,7 @@ Light:
   m_SpotAngle: 41.3809471
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_Strength: 1
     m_Bias: .0500000007
@@ -639,7 +639,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 143996}
-  _viewportModel: {fileID: 0}
+  _viewportModel: {fileID: 153170}
   _viewPoint: {fileID: 477798}
 --- !u!124 &12443996
 Behaviour:

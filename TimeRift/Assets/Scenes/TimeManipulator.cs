@@ -26,6 +26,8 @@ public class TimeManipulator : MonoBehaviour {
 	}
 
 	private List<AvatarTravelInfo> _avatarHistories = new List<AvatarTravelInfo>();
+	private int _indexOfParadox = -1;
+	private int _deathCount = 0;
 
 	// Get volume based on http://answers.unity3d.com/questions/165729/editing-height-relative-to-audio-levels.html
 	private float[] _volumeSamples = new float[1024]; // audio samples
@@ -48,7 +50,11 @@ public class TimeManipulator : MonoBehaviour {
 	[SerializeField]
 	Text _timeText;
 	[SerializeField]
+	Text _deathText;
+	[SerializeField]
 	GameObject _paradoxTextObject;
+	[SerializeField]
+	Text _paradoxTextExpl;
 	[SerializeField]
 	int _maxSecondsInitializer;
 	[SerializeField]
@@ -99,16 +105,53 @@ public class TimeManipulator : MonoBehaviour {
 
 	enum ParadoxCause {
 		Seen,
-		TooClose
+		TooClose,
+		Collection
 	}
 
-	private void InitiateParadox (ParadoxCause cause) {
+	private void InitiateCollectionParadox (CollectionParadox e) {
+		for (int i = 0; i < _avatarHistories.Count; i++) {
+			if (e.responsibleCharacter == _avatarHistories[i].entity) {
+				InitiateParadox(ParadoxCause.Collection, i);
+				break;
+			}
+		}
+	}
+
+	private void InitiateParadox (ParadoxCause cause, int characterIndex) {
+		switch (cause) {
+			case ParadoxCause.Seen:
+				_paradoxTextExpl.text = "Your past self saw you!";
+				break;
+			case ParadoxCause.TooClose:
+				_paradoxTextExpl.text = "Your past self heard you!";
+				break;
+			case ParadoxCause.Collection:
+				_paradoxTextExpl.text = "You stopped your past self from collecting that!";
+				break;
+		}
 		_screamAudioSource.clip = _screamSounds[Random.Range(0, _screamSounds.Length)];
 		_screamAudioSource.Play();
 
 		_alarmAudioSource.clip = _alarmSound;
 		_alarmAudioSource.Play();
 		_currTimeState = TimeState.RewindingBecauseSeen;
+
+		for (int i = characterIndex; i < _avatarHistories.Count; i++) {
+			_avatarHistories[i].entity.UnCollectAll();
+		}
+
+		_deathCount += _avatarHistories.Count - characterIndex - 1;
+
+		_indexOfParadox = characterIndex;
+	}
+
+	void OnEnable () {
+		Events.g.AddListener<CollectionParadox>(InitiateCollectionParadox);
+	}
+
+	void OnDisable () {
+		Events.g.RemoveListener<CollectionParadox>(InitiateCollectionParadox);
 	}
 
 	float _separationToCatch = 1f;
@@ -116,6 +159,7 @@ public class TimeManipulator : MonoBehaviour {
 	void FixedUpdate () {
 
 		_timeText.text = ReadableTime;
+		_deathText.text = _deathCount.ToString();
 
 		if (_currTimeState == TimeState.Playing) {
 			for (int i = 0; i < _avatarHistories.Count - 1; i++) {
@@ -123,7 +167,8 @@ public class TimeManipulator : MonoBehaviour {
 				if (_newestSelf == entityToTest) { continue; }
 				Vector3 toOther = _newestSelf.EyeLocation - entityToTest.EyeLocation;
 				if (toOther.sqrMagnitude <= _separationToCatch * _separationToCatch) {
-					InitiateParadox(ParadoxCause.TooClose);
+					InitiateParadox(ParadoxCause.TooClose, i);
+					break;
 				}
 				Debug.DrawLine(entityToTest.EyeLocation, entityToTest.EyeLocation + entityToTest.Forward, Color.red);
 				float f = Vector3.Dot(entityToTest.Forward, toOther.normalized);
@@ -135,7 +180,8 @@ public class TimeManipulator : MonoBehaviour {
 						if (hitInfo.collider.gameObject.GetComponent<TimeEntity>() != null) {
 							Debug.DrawLine(_newestSelf.EyeLocation, entityToTest.EyeLocation, Color.yellow);
 							Debug.DrawLine(hitInfo.point, entityToTest.EyeLocation, Color.green);
-							InitiateParadox(ParadoxCause.Seen);
+							InitiateParadox(ParadoxCause.Seen, i);
+							break;
 						}
 					}
 				}
@@ -156,8 +202,6 @@ public class TimeManipulator : MonoBehaviour {
 			} else {
 
 				GameObject newest = Instantiate(_newestSelf.gameObject, Vector3.zero, Quaternion.identity) as GameObject;
-									// oldestHistory.timeTravelFrames[0].location,
-									// oldestHistory.timeTravelFrames[0].rotation) as GameObject;
 				oldestHistory.entity = newest.GetComponent<TimeEntity>();
 				oldestHistory.entity.SetTo(oldestHistory.timeTravelFrames[0]);
 				oldestHistory.entity.SimulateMe = false;
@@ -216,14 +260,26 @@ public class TimeManipulator : MonoBehaviour {
 
 				_currFrame -= _paradoxRewindSpeed;
 			} else {
+				if (_indexOfParadox < (_avatarHistories.Count - 1)) {
+					_currFrame = _maxFramesSimulated - 1;
 
-				_currTimeState = TimeState.Playing;
-				_currFrame = 0;
-				_newestSelf.UnFreezeMotion();
+					// GameObject newest = Instantiate(_newestSelf.gameObject, Vector3.zero, Quaternion.identity) as GameObject;
+					_avatarHistories.RemoveAt(_avatarHistories.Count - 1);
+					Destroy(_avatarHistories[_avatarHistories.Count - 1].entity.gameObject);
+					AvatarTravelInfo oldestHistory = _avatarHistories[_avatarHistories.Count - 1];
+					oldestHistory.entity = _newestSelf;
+					oldestHistory.entity.SetTo(oldestHistory.timeTravelFrames[0]);
+					// oldestHistory.entity.SimulateMe = false;
 
-				_paradoxTextObject.SetActive(false);
-				_alarmLight.intensity = 0f;
-				_alarmAudioSource.Stop();
+				} else {
+					_currTimeState = TimeState.Playing;
+					_currFrame = 0;
+					_newestSelf.UnFreezeMotion();
+
+					_paradoxTextObject.SetActive(false);
+					_alarmLight.intensity = 0f;
+					_alarmAudioSource.Stop();
+				}
 			}
 		}
 

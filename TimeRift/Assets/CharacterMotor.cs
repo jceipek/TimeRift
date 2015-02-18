@@ -73,7 +73,7 @@ public class CharacterMotor : MonoBehaviour, IMotor
 	[SerializeField]
 	float _lookMaximumY = 60F;
 
-	private float _lookRotationY = 0F;
+	private float _lookRotationY = 5F;
 
 #endregion
 
